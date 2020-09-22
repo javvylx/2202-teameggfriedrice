@@ -1,12 +1,34 @@
 import shutil
 import os
 import argparse
-import pytz
+import pytz #timezone
 from datetime import datetime as dt
-import pywintypes
-import filetype
+import pywintypes #Module which supposrts common windows type
+import filetype #Determine original file extension
+import hashlib #Generate MD5
+import PyPDF2 # Read PDF Metadata
+
+##Run this on command prompt. If you are unsure, do this - python file_extract.py -h
 
 __description__ = "Gather filesystem metadata of provided file"
+
+def file_import():
+    parser = argparse.ArgumentParser(description=__description__)
+
+    parser.add_argument("source", help="Source file")
+
+    args = parser.parse_args()
+
+    source = os.path.abspath(args.source)
+
+    if os.sep in args.source:
+        src_file_name = args.source.split(os.sep, 1)[1]
+    else:
+        src_file_name = args.source
+
+    tz = pytz.timezone("Asia/Singapore")
+
+    return source, tz, src_file_name
 
 
 def file_extension(file):
@@ -22,22 +44,32 @@ def file_timestamp(source,tz):
     accessed = pywintypes.Time(tz.localize(accessed))
     print("Created: {}\nModified: {}\nAccessed: {}\n".format(created, modified, accessed))
 
-def file_import():
-    parser = argparse.ArgumentParser(description=__description__)
+def file_abspath(file):
+    print ("File absolute path: {}\n".format(os.path.abspath(file)))
 
-    parser.add_argument("source", help="Source file")
+def file_checksum(file):
+    md5_hash = hashlib.md5()
+    file_open = open(file,"rb")
+    content = file_open.read()
+    md5_hash.update(content)
+    digest = md5_hash.hexdigest()
+    print("MD5: {}\n".format(digest))
 
-    args = parser.parse_args()
+def file_pdf(file,filename):
+    pdfFile = PyPDF2.PdfFileReader(file)
+    data = pdfFile.getDocumentInfo()
+    print ("======Meta data for the file======")
+    count = 1
+    for metadata in data:
+        print ("{}) {}: {}".format(count, metadata[1:], data[metadata]))
+        count+=1
 
-    source = os.path.abspath(args.source)
-
-    tz = pytz.timezone("Asia/Singapore")
-
-    return source, tz
-
-source, tz = file_import()
+source, tz, src_file_name = file_import()
 file_extension(source)
 file_timestamp(source, tz)
+file_checksum(source)
+file_abspath(source)
+file_pdf(source, src_file_name)
 
 
 
