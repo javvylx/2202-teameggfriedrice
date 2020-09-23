@@ -15,8 +15,10 @@ print("File owned by %s\\%s" % (domain, name))
 
 
 import os
+import stat
 
-print(os.stat(FILENAME))
+print(os.lstat(FILENAME))
+print("Permisssion in Unix: {}".format(oct(stat.S_IMODE(os.lstat(FILENAME).st_mode))[2:]))
 # - st_mode - protection bits,
 # - st_ino - inode number,
 # - st_dev - device,
