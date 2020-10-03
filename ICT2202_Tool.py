@@ -2,23 +2,77 @@ import binascii, json, ctypes, struct, os, sys, getopt
 
 def get_mft_eh_val(file):
     #Currently only first header
+    result = open("r.txt", "w")
+    count = 0
     file.seek(0)
-    x = file.read(48)
-    print("Signature: " + str(struct.unpack("<I", x[:4])[0])) # Signature; "<": little endian, "I": unsigned int (4 bytes)
-    print("Fix-up offset: " + str(struct.unpack("<H", x[4:6])[0])) # Fix-up offset; "<": little endian, "H": unsigned short (2 bytes)
-    print("Fix-up values: " + str(struct.unpack("<H", x[6:8])[0])) # Fix-up values; "<": little endian, "H": unsigned short (2 bytes)
-    print("LogFile Seq Number: " + str(struct.unpack("<d", x[8:16])[0])) # LogFile Seq Number; "<": little endian, "d": double (8 bytes)
-    print("Seq Number: " + str(struct.unpack("<H", x[16:18])[0])) # Seq Number; "<": little endian, "H": unsigned short (2 bytes)
-    print("Reference Count: " + str(struct.unpack("<H", x[18:20])[0])) # Reference Count; "<": little endian, "H": unsigned short (2 bytes)
-    print("Attribute offset: " + str(struct.unpack("<H", x[20:22])[0])) # Attribute offset; "<": little endian, "H": unsigned short (2 bytes)
-    print("Entry Flags: " + str(struct.unpack("<H", x[22:24])[0])) # Entry Flags; "<": little endian, "H": unsigned short (2 bytes)
-    print("used entry size: " + str(struct.unpack("<I", x[24:28])[0])) # used entry size; "<": little endian, "I": unsigned int (4 bytes)
-    print("Total entry size: " + str(struct.unpack("<I", x[28:32])[0])) # Total entry size (possible > 1024 bytes); "<": little endian, "I": unsigned int (4 bytes)
-    print("Base record file reference: " + str(struct.unpack("<Ixx", x[32:38])[0])) # Base record file reference; "<": little endian, "I": unsigned int (4 bytes), "x": just padding only (1 byte per x)
-    print("Base record file seq: " + str(struct.unpack("<H", x[38:40])[0])) # Base record file seq; "<": little endian, "H": unsigned short (2 bytes)
-    print("Next attribute identifier: " + str(struct.unpack("<H", x[40:42])[0])) # Next attribute identifier; "<": little endian, "H": unsigned short (2 bytes)
-    print("MFT Entry record number: " + str(struct.unpack("<I", x[44:48])[0])) # MFT Entry record number; "<": little endian, "I": unsigned int (4 bytes)
-    x = file.read(struct.unpack("<I", x[28:32])[0]-48)
+    while(True):
+        count+=1
+        header = file.read(48)
+        if(header[:4] == b'\x00\x00\x00\x00'):
+            file.read(1024-48)
+            continue
+        if header!="":
+            result.write("Signature: " + str(struct.unpack("<I", header[:4])[0])) # Signature; "<": little endian, "I": unsigned int (4 bytes)
+            result.write("\r\n")
+            result.write("Fix-up offset: " + str(struct.unpack("<H", header[4:6])[0])) # Fix-up offset; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("Fix-up values: " + str(struct.unpack("<H", header[6:8])[0])) # Fix-up values; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("LogFile Seq Number: " + str(struct.unpack("<d", header[8:16])[0])) # LogFile Seq Number; "<": little endian, "d": double (8 bytes)
+            result.write("\r\n")
+            result.write("Seq Number: " + str(struct.unpack("<H", header[16:18])[0])) # Seq Number; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("Reference Count: " + str(struct.unpack("<H", header[18:20])[0])) # Reference Count; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("Attribute offset: " + str(struct.unpack("<H", header[20:22])[0])) # Attribute offset; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("Entry Flags: " + str(struct.unpack("<H", header[22:24])[0])) # Entry Flags; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("used entry size: " + str(struct.unpack("<I", header[24:28])[0])) # used entry size; "<": little endian, "I": unsigned int (4 bytes)
+            result.write("\r\n")
+            result.write("Total entry size: " + str(struct.unpack("<I", header[28:32])[0])) # Total entry size (possible > 1024 bytes); "<": little endian, "I": unsigned int (4 bytes)
+            result.write("\r\n")
+            result.write("Base record file reference: " + str(struct.unpack("<Ixx", header[32:38])[0])) # Base record file reference; "<": little endian, "I": unsigned int (4 bytes), "x": just padding only (1 byte per x)
+            result.write("\r\n")
+            result.write("Base record file seq: " + str(struct.unpack("<H", header[38:40])[0])) # Base record file seq; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("Next attribute identifier: " + str(struct.unpack("<H", header[40:42])[0])) # Next attribute identifier; "<": little endian, "H": unsigned short (2 bytes)
+            result.write("\r\n")
+            result.write("MFT Entry record number: " + str(struct.unpack("<I", header[44:48])[0])) # MFT Entry record number; "<": little endian, "I": unsigned int (4 bytes)
+            result.write("\r\n")
+            result.write("-"*300 + "\r\n")
+            print(count)
+            try:
+                print("number:")
+                print(struct.unpack("<I", header[28:32])[0])
+                print("--------")
+                file.read(struct.unpack("<I", header[28:32])[0]-48)
+            except:
+                print("test")
+                break
+        else:
+            result.close()
+            break
+
+
+
+
+    # x = file.read(48)
+    # print("Signature: " + str(struct.unpack("<I", x[:4])[0])) # Signature; "<": little endian, "I": unsigned int (4 bytes)
+    # print("Fix-up offset: " + str(struct.unpack("<H", x[4:6])[0])) # Fix-up offset; "<": little endian, "H": unsigned short (2 bytes)
+    # print("Fix-up values: " + str(struct.unpack("<H", x[6:8])[0])) # Fix-up values; "<": little endian, "H": unsigned short (2 bytes)
+    # print("LogFile Seq Number: " + str(struct.unpack("<d", x[8:16])[0])) # LogFile Seq Number; "<": little endian, "d": double (8 bytes)
+    # print("Seq Number: " + str(struct.unpack("<H", x[16:18])[0])) # Seq Number; "<": little endian, "H": unsigned short (2 bytes)
+    # print("Reference Count: " + str(struct.unpack("<H", x[18:20])[0])) # Reference Count; "<": little endian, "H": unsigned short (2 bytes)
+    # print("Attribute offset: " + str(struct.unpack("<H", x[20:22])[0])) # Attribute offset; "<": little endian, "H": unsigned short (2 bytes)
+    # print("Entry Flags: " + str(struct.unpack("<H", x[22:24])[0])) # Entry Flags; "<": little endian, "H": unsigned short (2 bytes)
+    # print("used entry size: " + str(struct.unpack("<I", x[24:28])[0])) # used entry size; "<": little endian, "I": unsigned int (4 bytes)
+    # print("Total entry size: " + str(struct.unpack("<I", x[28:32])[0])) # Total entry size (possible > 1024 bytes); "<": little endian, "I": unsigned int (4 bytes)
+    # print("Base record file reference: " + str(struct.unpack("<Ixx", x[32:38])[0])) # Base record file reference; "<": little endian, "I": unsigned int (4 bytes), "x": just padding only (1 byte per x)
+    # print("Base record file seq: " + str(struct.unpack("<H", x[38:40])[0])) # Base record file seq; "<": little endian, "H": unsigned short (2 bytes)
+    # print("Next attribute identifier: " + str(struct.unpack("<H", x[40:42])[0])) # Next attribute identifier; "<": little endian, "H": unsigned short (2 bytes)
+    # print("MFT Entry record number: " + str(struct.unpack("<I", x[44:48])[0])) # MFT Entry record number; "<": little endian, "I": unsigned int (4 bytes)
+    # x = file.read(struct.unpack("<I", x[28:32])[0]-48)
 
 
 def main(args):
