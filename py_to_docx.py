@@ -10,27 +10,10 @@ file_input = './input/out.csv'
 sus_file = './input/test.sus'
 
 class FileMetaExtractor:
-
-
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-
-    def get_file_records_count(self):
+    def fileHash(self, file):
         try:
-            return len(list(csv.reader(open(self.file_path))))
-        except Exception as e:
-            return -1
-        return None
-
-    # print("The total records in the MFT file image is: " + str(fileObject) + " records")
-
-
-    def fileHash(self):
-        try:
-            with open(self.file_path, "rb") as f:  # rb stands opening the file in binary format for reading only
-                hashed = f.read()  # read entire file as bytes
-                return hashlib.sha256(hashed).hexdigest()
+            hashed = file.read()  # read entire file as bytes
+            return hashlib.sha256(hashed).hexdigest()
         except Exception as e:
             return None
         return None
@@ -41,6 +24,9 @@ class FileMetaExtractor:
         except Exception as e:
             return -1
         # print("The size of the suspicious file is: " + str(getfileSize) + " bytes")
+
+    def createReport(self, overallcontent, wd, filehash):
+        #! DYI
 
 
 obj = FileMetaExtractor("./input/test.sus")
