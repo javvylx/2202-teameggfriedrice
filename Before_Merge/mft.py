@@ -244,6 +244,7 @@ def get_mft_eh_val(file):
 
             get_mft_data(header, record['attr_offset'])
 
+
             #! Do the check only if both $SI and $FN is available
             if bool(record['fn', 1]) and bool(record['si']):
                 flag = anomaly_check(record, record['fncount'])
