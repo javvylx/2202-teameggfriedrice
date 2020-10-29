@@ -6,3 +6,6 @@ test.txt
 test2.txt
 log.txt
 log.csv
+output/digital_forensic.pdf
+output/overall_anomalies.csv
+output/out.csv

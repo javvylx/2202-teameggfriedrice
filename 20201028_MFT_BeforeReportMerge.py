@@ -175,7 +175,7 @@ def anomaly_timestamp_check_SI_FN(mft_record,fn_count):
     1: 0s in $FN
     2: Invalid $FN Timestamp
     3. $FN nanosec = 0
-    4: $SI (crtime) after $FN (crtime)
+    4: $SI (crtime) before $FN (crtime)
     5: $FN after Current Time
     '''
     check = 1
@@ -291,10 +291,13 @@ def get_mft_eh_val(file):
     anomaly_SI_1, anomaly_SI_2, anomaly_SI_3, anomaly_SI_4, anomaly_SI_5, anomaly_SI_6 = 0, 0, 0, 0, 0, 0
     anomaly_SI_FN_1, anomaly_SI_FN_2, anomaly_SI_FN_3, anomaly_SI_FN_4, anomaly_SI_FN_5= 0, 0, 0, 0, 0
     anonamlymftrecord = 0
+    test = 0
+    a1, a2 = True, True
     while (True):
         count += 1
         hexdata = file.read(1024)
         if hexdata[:4] == b'\x00\x00\x00\x00':
+            test += 1
             continue
         if hexdata[:4] == b'':
             result.close()
@@ -330,9 +333,11 @@ def get_mft_eh_val(file):
                     if flag_SI == 1:
                         wd.append((count, "anomaly_SI_1"))
                         anomaly_SI_1 += 1
+                        a1 = False
                     if flag_SI == 2:
                         wd.append((count, "anomaly_SI_2"))
                         anomaly_SI_2 += 1
+                        a2 = False
                     if flag_SI == 3:
                         wd.append((count, "anomaly_SI_3"))
                         anomaly_SI_3 += 1
@@ -347,7 +352,7 @@ def get_mft_eh_val(file):
                         anomaly_SI_6 += 1
             
             #* Do Anomaly check only if both $SI and $FN is available
-            if mft_record['fncount'] > 0 and mft_record['fn', 1] and 'si' in mft_record and anomaly_SI_1 == 0 and anomaly_SI_2 == 0:
+            if mft_record['fncount'] > 0 and mft_record['fn', 1] and 'si' in mft_record and a1 and a2:
                 flag_SI_FN = anomaly_timestamp_check_SI_FN(mft_record,mft_record['fncount'])
                 if flag_SI_FN != 0:
                     if flag_SI_FN == 1:
@@ -365,7 +370,8 @@ def get_mft_eh_val(file):
                     if flag_SI_FN == 5:
                         wd.append((count, "anomaly_SI_FN_5"))
                         anomaly_SI_FN_5 += 1
-
+            
+            a1, a2 = True, True
 
         else:
             result.close()
@@ -400,6 +406,8 @@ def get_mft_eh_val(file):
     #******************************************************************************************************************************************#
     #fileme.createReport(overalldata,wd,fileme.fileHash(file))
     #******************************************************************************************************************************************#
+    print(test)
+    print("anomalymftrecord: " + str(anonamlymftrecord))
     print("Anomaly $SI: ", anomaly_SI_1, anomaly_SI_2, anomaly_SI_3, anomaly_SI_4, anomaly_SI_5, anomaly_SI_6)
     print("Anomaly $SI + $FN: ", anomaly_SI_FN_1, anomaly_SI_FN_2, anomaly_SI_FN_3, anomaly_SI_FN_4, anomaly_SI_FN_5)
 
