@@ -148,22 +148,22 @@ def anomaly_timestamp_check_SI(mft_record):
         if mft_record['si']['crtime'][2] != 0:
             if len(str(mft_record['si']['crtime'][2]).split('.')[1]) == 1 and str(mft_record['si']['crtime'][2]).split('.')[1] == str(0):
                 return 3
-            elif str(mft_record['si']['crtime'][2]).split('.')[1][-3] == str(000):
+            elif str(mft_record['si']['crtime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['mtime'][2] != 0:
             if len(str(mft_record['si']['mtime'][2]).split('.')[1]) == 1 and str(mft_record['si']['mtime'][2]).split('.')[1] == str(0):
                 return 3
-            elif str(mft_record['si']['mtime'][2]).split('.')[1][-3] == str(000):
+            elif str(mft_record['si']['mtime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['ctime'][2] != 0:
             if len(str(mft_record['si']['ctime'][2]).split('.')[1]) == 1 and str(mft_record['si']['ctime'][2]).split('.')[1] == str(0):
                 return 3
-            elif str(mft_record['si']['ctime'][2]).split('.')[1][-3] == str(000):
+            elif str(mft_record['si']['ctime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['atime'][2] != 0:
             if len(str(mft_record['si']['atime'][2]).split('.')[1]) == 1 and str(mft_record['si']['atime'][2]).split('.')[1] == str(0):
                 return 3
-            elif str(mft_record['si']['atime'][2]).split('.')[1][-3] == str(000):
+            elif str(mft_record['si']['atime'][2]).split('.')[1][-3:] == str(000):
                 return 3
 
         # Check for $SI Create Time after the $SI Modify Time
@@ -214,22 +214,22 @@ def anomaly_timestamp_check_SI_FN(mft_record, fn_count):
             if mft_record['fn', check]['crtime'][2] != 0:
                 if len(str(mft_record['fn', check]['crtime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['crtime'][2]).split('.')[1] == str(0):
                     return 3
-                elif str(mft_record['fn', check]['crtime'][2]).split('.')[1][-3] == str(000):
+                elif str(mft_record['fn', check]['crtime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['mtime'][2] != 0:
                 if len(str(mft_record['fn', check]['mtime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['mtime'][2]).split('.')[1] == str(0):
                     return 3
-                elif str(mft_record['fn', check]['mtime'][2]).split('.')[1][-3] == str(000):
+                elif str(mft_record['fn', check]['mtime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['ctime'][2] != 0:
                 if len(str(mft_record['fn', check]['ctime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['ctime'][2]).split('.')[1] == str(0):
                     return 3
-                elif str(mft_record['fn', check]['ctime'][2]).split('.')[1][-3] == str(000):
+                elif str(mft_record['fn', check]['ctime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['atime'][2] != 0:
                 if len(str(mft_record['fn', check]['atime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['atime'][2]).split('.')[1] == str(0):
                     return 3
-                elif str(mft_record['fn', check]['atime'][2]).split('.')[1][-3] == str(000):
+                elif str(mft_record['fn', check]['atime'][2]).split('.')[1][-3:] == str(000):
                     return 3
 
             # Check for $SI Create Time is before $FN Create Time
@@ -695,6 +695,7 @@ def args_route(mftfn):
         print("Please input the MFT file.")
     else:
         f = open(mftfn, "rb")
+        print("Extracting MFT...")
         get_mft_eh_val(f)
 
 if __name__ == '__main__':
