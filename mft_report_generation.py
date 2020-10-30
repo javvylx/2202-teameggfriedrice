@@ -1,4 +1,4 @@
-import struct, os, sys, getopt, datetime, csv, hashlib, argparse
+import struct, os, sys, getopt, datetime, csv, hashlib, argparse, time
 from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -146,22 +146,26 @@ def anomaly_timestamp_check_SI(mft_record):
     # Check for $SI with a nanosecond value of '0'
     else:
         if mft_record['si']['crtime'][2] != 0:
-            if len(str(mft_record['si']['crtime'][2]).split('.')[1]) == 1 and str(mft_record['si']['crtime'][2]).split('.')[1] == str(0):
+            if len(str(mft_record['si']['crtime'][2]).split('.')[1]) == 1 and \
+                    str(mft_record['si']['crtime'][2]).split('.')[1] == str(0):
                 return 3
             elif str(mft_record['si']['crtime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['mtime'][2] != 0:
-            if len(str(mft_record['si']['mtime'][2]).split('.')[1]) == 1 and str(mft_record['si']['mtime'][2]).split('.')[1] == str(0):
+            if len(str(mft_record['si']['mtime'][2]).split('.')[1]) == 1 and \
+                    str(mft_record['si']['mtime'][2]).split('.')[1] == str(0):
                 return 3
             elif str(mft_record['si']['mtime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['ctime'][2] != 0:
-            if len(str(mft_record['si']['ctime'][2]).split('.')[1]) == 1 and str(mft_record['si']['ctime'][2]).split('.')[1] == str(0):
+            if len(str(mft_record['si']['ctime'][2]).split('.')[1]) == 1 and \
+                    str(mft_record['si']['ctime'][2]).split('.')[1] == str(0):
                 return 3
             elif str(mft_record['si']['ctime'][2]).split('.')[1][-3:] == str(000):
                 return 3
         elif mft_record['si']['atime'][2] != 0:
-            if len(str(mft_record['si']['atime'][2]).split('.')[1]) == 1 and str(mft_record['si']['atime'][2]).split('.')[1] == str(0):
+            if len(str(mft_record['si']['atime'][2]).split('.')[1]) == 1 and \
+                    str(mft_record['si']['atime'][2]).split('.')[1] == str(0):
                 return 3
             elif str(mft_record['si']['atime'][2]).split('.')[1][-3:] == str(000):
                 return 3
@@ -212,22 +216,26 @@ def anomaly_timestamp_check_SI_FN(mft_record, fn_count):
         else:
 
             if mft_record['fn', check]['crtime'][2] != 0:
-                if len(str(mft_record['fn', check]['crtime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['crtime'][2]).split('.')[1] == str(0):
+                if len(str(mft_record['fn', check]['crtime'][2]).split('.')[1]) == 1 and \
+                        str(mft_record['fn', check]['crtime'][2]).split('.')[1] == str(0):
                     return 3
                 elif str(mft_record['fn', check]['crtime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['mtime'][2] != 0:
-                if len(str(mft_record['fn', check]['mtime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['mtime'][2]).split('.')[1] == str(0):
+                if len(str(mft_record['fn', check]['mtime'][2]).split('.')[1]) == 1 and \
+                        str(mft_record['fn', check]['mtime'][2]).split('.')[1] == str(0):
                     return 3
                 elif str(mft_record['fn', check]['mtime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['ctime'][2] != 0:
-                if len(str(mft_record['fn', check]['ctime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['ctime'][2]).split('.')[1] == str(0):
+                if len(str(mft_record['fn', check]['ctime'][2]).split('.')[1]) == 1 and \
+                        str(mft_record['fn', check]['ctime'][2]).split('.')[1] == str(0):
                     return 3
                 elif str(mft_record['fn', check]['ctime'][2]).split('.')[1][-3:] == str(000):
                     return 3
             elif mft_record['fn', check]['atime'][2] != 0:
-                if len(str(mft_record['fn', check]['atime'][2]).split('.')[1]) == 1 and str(mft_record['fn', check]['atime'][2]).split('.')[1] == str(0):
+                if len(str(mft_record['fn', check]['atime'][2]).split('.')[1]) == 1 and \
+                        str(mft_record['fn', check]['atime'][2]).split('.')[1] == str(0):
                     return 3
                 elif str(mft_record['fn', check]['atime'][2]).split('.')[1][-3:] == str(000):
                     return 3
@@ -239,13 +247,14 @@ def anomaly_timestamp_check_SI_FN(mft_record, fn_count):
             # Check for $FN Time after Current Time
             if mft_record['fn', check]['crtime'][1] > str(datetime.datetime.now()) or mft_record['fn', check]['mtime'][
                 1] > str(datetime.datetime.now()) or mft_record['fn', check]['ctime'][1] > str(
-                    datetime.datetime.now()) or mft_record['fn', check]['atime'][1] > str(datetime.datetime.now()):
+                datetime.datetime.now()) or mft_record['fn', check]['atime'][1] > str(datetime.datetime.now()):
                 return 5
 
         check += 1
 
     # Return Flag 0 for no anomalies
     return 0
+
 
 # * GET ATTRIBUTE HEADER
 def get_attr_header(pointer):
@@ -273,6 +282,7 @@ def get_attr_header(pointer):
         d['streamsize'] = struct.unpack("<Lxxxx", pointer[56:64])[0]  # n64StreamSize
 
     return d
+
 
 # * GET MFT ENTRY HEADER
 def get_mft_entry_header(raw_data):
@@ -311,6 +321,7 @@ def get_mft_entry_header(raw_data):
     }
     return mft_record
 
+
 # * HEADERS FOR OUT.CSV
 def csvheader():
     listheader = ["Data Number", "Signature", "Fix-up Data Offset", "Fix-up Data Array Size", "Log Sequence Number",
@@ -327,27 +338,30 @@ def csvheader():
                   "$FN_3 Filename Length", "$FN_3 Name Space Length", "$FN_3 Filename"]
     return listheader
 
+
 # * EXCEL FRIENDLY DATE FORMAT
 def excel_date(date1):
     return '="{}"'.format(date1)
 
+
 # * DICT OF ANOMALY REASON
 def retrReason(n):
     anomreason = {
-        "anomalymftrecord" : "MFT record might be tampered/damaged",
-        "anomaly_SI_1" : "$SI Timestamp zerorised",
-        "anomaly_SI_2" : "$SI Timestamp is invalid",
-        "anomaly_SI_3" : "$SI Timestamp with 0 nanosecond",
-        "anomaly_SI_4" : "$SI Create Timestamp after $SI Modify Timestamp",
-        "anomaly_SI_5" : "$SI Assess Timestamp after both $SI Modify Timestamp and $SI Create Timestamp",
-        "anomaly_SI_6" : "$SI Timestamp after Current Time",
-        "anomaly_SI_FN_1" : "$FN Timestamp zerorised",
-        "anomaly_SI_FN_2" : "$FN Timestamp is invalid",
-        "anomaly_SI_FN_3" : "$FN Timestamp with 0 nanosecond",
-        "anomaly_SI_FN_4" : "$SI Create Timestamp before $FN Create Timestamp",
-        "anomaly_SI_FN_5" : "$FN Timestamp after Current Time"
+        "anomalymftrecord": "MFT record might be tampered/damaged",
+        "anomaly_SI_1": "$SI Timestamp zerorised",
+        "anomaly_SI_2": "$SI Timestamp is invalid",
+        "anomaly_SI_3": "$SI Timestamp with 0 nanosecond",
+        "anomaly_SI_4": "$SI Create Timestamp after $SI Modify Timestamp",
+        "anomaly_SI_5": "$SI Assess Timestamp after both $SI Modify Timestamp and $SI Create Timestamp",
+        "anomaly_SI_6": "$SI Timestamp after Current Time",
+        "anomaly_SI_FN_1": "$FN Timestamp zerorised",
+        "anomaly_SI_FN_2": "$FN Timestamp is invalid",
+        "anomaly_SI_FN_3": "$FN Timestamp with 0 nanosecond",
+        "anomaly_SI_FN_4": "$SI Create Timestamp before $FN Create Timestamp",
+        "anomaly_SI_FN_5": "$FN Timestamp after Current Time"
     }
     return anomreason[n]
+
 
 # * RETURN A STRING TO SEE IF THE SIGNATURE IS GOOD OR BAD
 def signaturechk(n):
@@ -356,6 +370,7 @@ def signaturechk(n):
     else:
         return "Bad MFT Signature"
 
+
 # * PADDING FOR EXCEL
 def padding(n):
     t = []
@@ -363,16 +378,17 @@ def padding(n):
         t.append('')
     return t
 
+
 # * GENERATE A LIST TO WRITE INTO OUT.CSV
 def writecsv(mft_record):
-    csvcontent = [mft_record['datanumber'], signaturechk(mft_record['signature']), 
-                    mft_record['fixup_offset'],mft_record['fixup_arraysize'],
-                    mft_record['log_seq_num'],mft_record['seq_num'],
-                    mft_record['ref_count'],mft_record['attr_offset'],
-                    mft_record['entry_flags'],mft_record['used_entry_size'],
-                    mft_record['total_entry_size'],mft_record['base_rec_file_ref'],
-                    mft_record['next_attr_id'],mft_record['record_num']]
-    #print(mft_record['si']['crtime'])
+    csvcontent = [mft_record['datanumber'], signaturechk(mft_record['signature']),
+                  mft_record['fixup_offset'], mft_record['fixup_arraysize'],
+                  mft_record['log_seq_num'], mft_record['seq_num'],
+                  mft_record['ref_count'], mft_record['attr_offset'],
+                  mft_record['entry_flags'], mft_record['used_entry_size'],
+                  mft_record['total_entry_size'], mft_record['base_rec_file_ref'],
+                  mft_record['next_attr_id'], mft_record['record_num']]
+    # print(mft_record['si']['crtime'])
     if 'si' not in mft_record:
         csvcontent.extend(padding(6))
     elif 'si' in mft_record:
@@ -397,7 +413,7 @@ def writecsv(mft_record):
         csvcontent.extend(padding(21))
     elif mft_record['fncount'] > 0:
         for i in range(3):
-            if (i) == mft_record['fncount']-1:
+            if (i) == mft_record['fncount'] - 1:
                 break
             check = i + 1
             if mft_record['fn', check]['crtime'] is not None:
@@ -416,15 +432,21 @@ def writecsv(mft_record):
                 csvcontent.extend([excel_date(mft_record['fn', check]['atime'][1])])
             else:
                 csvcontent.extend(padding(1))
-            csvcontent.extend([mft_record['fn', check]['flags'], mft_record['fn',check]['nlen'],mft_record['fn',check]['nspace'], str(mft_record['fn',check]['name'])[2:-1]])
+            csvcontent.extend(
+                [mft_record['fn', check]['flags'], mft_record['fn', check]['nlen'], mft_record['fn', check]['nspace'],
+                 str(mft_record['fn', check]['name'])[2:-1]])
     if mft_record['fncount'] < 3:
-        csvcontent.extend(padding((3-mft_record['fncount'])*7))
+        csvcontent.extend(padding((3 - mft_record['fncount']) * 7))
     return csvcontent
+
 
 # * MAIN TOOL FUNCTION
 def get_mft_eh_val(file):
-    result = open("./output/out.csv", "w")
-    oa_anom = open("./output/overall_anomalies.csv", "w")
+    gen_folderpath = r'./output/' + time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime()) + "/"  # Generating Folder Path with Date Time Stamps
+    os.makedirs(gen_folderpath, exist_ok=True) # Go ahead with generation even if folder exists
+    result = open(gen_folderpath + file.name + "_output.csv", "w")
+    oa_anom = open(gen_folderpath + file.name + "_overall_anomalies.csv", "w")
+
     count = 0
     overalldata, wd = [], []
     listcsvcolumns = csvheader()
@@ -441,6 +463,7 @@ def get_mft_eh_val(file):
         hexdata = file.read(1024)
         if hexdata[:4] == b'\x00\x00\x00\x00':
             continue
+
         if hexdata[:4] == b'':
             oa_anom.close()
             result.close()
@@ -455,7 +478,7 @@ def get_mft_eh_val(file):
             x = writecsv(mft_record)
             writer.writerow(x)
 
-            #? Do Anomaly Check if MFT record is tampered
+            # ? Do Anomaly Check if MFT record is tampered
             bool_mftrecord_check = anomaly_mftrecord_check(mft_record)
             if bool_mftrecord_check == 1:
                 wd.append((count, "anomalymftrecord"))
@@ -527,9 +550,10 @@ def get_mft_eh_val(file):
         [count, anomalymftrecord, anomaly_SI_1, anomaly_SI_2, anomaly_SI_3, anomaly_SI_4, anomaly_SI_5, anomaly_SI_6,
          anomaly_SI_FN_1, anomaly_SI_FN_2, anomaly_SI_FN_3, anomaly_SI_FN_4, anomaly_SI_FN_5])
 
-# *************************************************Start Report********************************************************#
-    file_name = "digital_forensic"
-    createReport(count, file, overalldata, wd, file_name)
+    # *************************************************Start Report********************************************************#
+    reportName = file.name + "_digital_forensic_summary_report"
+    createReport(count, file, overalldata, wd, reportName, gen_folderpath, )
+
 
 # * GET SHA 256 HASH FOR THE INPUT FILE
 def fileHash(file):
@@ -540,15 +564,17 @@ def fileHash(file):
     except Exception as e:
         return None
 
+
 # * RETRIEVE THE FILE SIZE
 def fileSize(file):
     try:
         return os.path.getsize(file)
     except Exception as e:
         return - 1
-        
+
+
 # * GENERATE THE REPORT
-def createReport(count, file, overalldata, wd, fileName):
+def createReport(count, file, overalldata, wd, reportName, gen_folderpath):
     document = Document()
     header = document.sections[0].header
     htable = header.add_table(1, 2, Inches(6))
@@ -559,25 +585,30 @@ def createReport(count, file, overalldata, wd, fileName):
     ht1 = htab_cells[1].add_paragraph('Singapore Institute of Technology')
     ht1.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
 
-    heading = document.add_heading('Digital Forensic Report', 0)
+    heading = document.add_heading('Digital Forensic Summary Report', 0)
     heading.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-
-    reportCreationDate = document.add_paragraph("Report Creation Date: " + str(date.today()))
+    reportCreationDate = document.add_paragraph(
+        "Report Creation Date & Time: " + str(time.strftime("%d/%m/%Y %H:%M:%S", time.localtime())))
     reportCreationDate.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-# ************************************************ Start of Image Summary ******************************************** #
+    # ************************************************ Start of Image Summary ******************************************** #
     document.add_page_break()
     summary = document.add_heading('Image File Summary', 0)
     # print(file.name)
     summary.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
-    document.add_paragraph("The name of the image file is: " + str(os.path.basename(file.name)), style=None)
-    document.add_paragraph("The total records in the image file is: " + str(count) + " records", style=None)
-    document.add_paragraph("The sha256sum of the image file is: " + str(fileHash(file.name)), style=None)
-    document.add_paragraph("The size of the image file is: " + str(fileSize(file.name)) + " bytes", style=None)
-# ************************************************ End of Image Summary ********************************************** #
-# ************************************************ Start of Anomalies Summary **************************************** #
+    imageFileName = document.add_paragraph("The name of the image file is: ")
+    imageFileName.add_run(str(os.path.basename(file.name))).underline = True
+    totalImageRecords = document.add_paragraph("The total records in the image file is: ")
+    totalImageRecords.add_run(str(count) + "records").underline = True
+    hashImageFile = document.add_paragraph("The sha256sum of the image file is: ")
+    hashImageFile.add_run(str(fileHash(file.name))).underline = True
+    sizeImageFile = document.add_paragraph("The size of the image file is: ")
+    sizeImageFile.add_run(str(fileSize(file.name)) + " bytes").underline = True
+
+    # ************************************************ End of Image Summary ********************************************** #
+    # ************************************************ Start of Anomalies Summary **************************************** #
     # Anamolies flagged out
     document.add_page_break()
-    summary = document.add_heading('Image file Anomalies Summary', 0)
+    summary = document.add_heading('Image File Anomalies Summary', 0)
     summary.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
     anomaly1 = overalldata[1]
     anomaly2 = overalldata[2]
@@ -593,7 +624,9 @@ def createReport(count, file, overalldata, wd, fileName):
     anomaly12 = overalldata[12]
     totalanomalynum = anomaly1 + anomaly2 + anomaly3 + anomaly4 + anomaly5 + anomaly6 + anomaly7 + anomaly8 + \
                       anomaly9 + anomaly10 + anomaly11 + anomaly12
-    document.add_paragraph("The total number of anomalies being flagged out: " + str(totalanomalynum), style=None)
+
+    anomalyFlagged = document.add_paragraph("The total number of anomalies being flagged out: ")
+    anomalyFlagged.add_run(str(totalanomalynum) + "anomalies").underline = True
     anomaly_records = (
         (1, 'MFT record might be tampered/damaged', anomaly1),
         (2, '$SI Timestamp zerorised', anomaly2),
@@ -619,8 +652,8 @@ def createReport(count, file, overalldata, wd, fileName):
         row_cells[1].text = str(anomal)
         row_cells[2].text = str(anomaly_c)
 
-# ************************************************ End of Anomalies Summary ****************************************** #
-# *********************************************** Creation of Footer ************************************************* #
+    # ************************************************ End of Anomalies Summary ****************************************** #
+    # *********************************************** Creation of Footer ************************************************* #
     def create_element(name):
         return OxmlElement(name)
 
@@ -676,30 +709,31 @@ def createReport(count, file, overalldata, wd, fileName):
     add_page_number(document.sections[0].footer.paragraphs[0])
     document.sections[0].footer.paragraphs[0].alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
 
-# ********************************************* End Creation of Footer *********************************************** #
-    # Report Generation
-    output_folder = './output/'
-    document.save(output_folder + fileName + '.docx')
+    # ********************************************* End Creation of Footer *********************************************** #
+
+    document.save(gen_folderpath + reportName + '.docx')
     print("\nGenerating PDF Document...")
-    doc_report = output_folder + fileName + '.docx'
-    pdf_report = output_folder + fileName + '.pdf'
+    doc_report = gen_folderpath + reportName + '.docx'
+    pdf_report = gen_folderpath + reportName + '.pdf'
 
     convert(doc_report)
     convert(doc_report, pdf_report)
     os.remove(doc_report)
 
+
 # *********************************************** End Report Creation ************************************************ #
 
 def args_route(mftfn):
-    if(mftfn == None):
+    if (mftfn == None):
         print("Please input the MFT file.")
     else:
         f = open(mftfn, "rb")
-        print("Extracting MFT...")
+        print("Extracting Master File Table Records! Please wait...")
         get_mft_eh_val(f)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f',  help='-f <path to MFT file>')
+    parser.add_argument('-f', help='-f <path to MFT file>')
     args = parser.parse_args()
     args_route(args.f)
