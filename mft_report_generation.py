@@ -1,3 +1,4 @@
+# * Import Library
 import struct, os, datetime, csv, hashlib, argparse, time
 from docx import Document
 from docx.shared import Inches
@@ -14,10 +15,12 @@ def get_mft_data(raw_file, mft_record, read_ptr):
     # Generally each file MFT is 1024 btyes
     while read_ptr < 1024:
 
+        # End of attributes
         attr_record = get_attr_header(raw_file[read_ptr:])
-        if attr_record['type'] == 0xffffffff:  # End of attributes
+        if attr_record['type'] == 0xffffffff:
             return mft_record
 
+        # Name
         if attr_record['name_len'] > 0:
             file_bytes = raw_file[
                          read_ptr + attr_record['name_off']: read_ptr + attr_record['name_off'] + attr_record[
@@ -26,15 +29,18 @@ def get_mft_data(raw_file, mft_record, read_ptr):
         else:
             attr_record['name'] = ''
 
-        if attr_record['type'] == 0x10:  # Standard Information
+        # Standard Information
+        if attr_record['type'] == 0x10:
             si_record = get_si_attribute(raw_file[read_ptr + attr_record['soff']:], TIMEZONE)
             mft_record['si'] = si_record
 
-        if attr_record['type'] == 0x30:  # File Name
+        # File Name
+        if attr_record['type'] == 0x30:
             fn_record = get_fn_attribute(raw_file[read_ptr + attr_record['soff']:], TIMEZONE)
             mft_record['fncount'] += 1
             mft_record['fn', mft_record['fncount']] = fn_record
 
+        # Next Attribute
         if attr_record['len'] > 0:
             read_ptr = read_ptr + attr_record['len']
         else:
@@ -68,9 +74,13 @@ def get_fn_attribute(s, tz):
     fn_attr = {
         'par_ref': struct.unpack("<Lxx", s[:6])[0], 'par_seq': struct.unpack("<H", s[6:8])[0],
         'crtime': get_time(struct.unpack("<L", s[8:12])[0], struct.unpack("<L", s[12:16])[0], tz),
+        # File create time; "<": little endian, "L": unassigned long (4 bytes)
         'mtime': get_time(struct.unpack("<L", s[16:20])[0], struct.unpack("<L", s[20:24])[0], tz),
+        # MFT changed time; "<": little endian, "L": unassigned long (4 bytes)
         'ctime': get_time(struct.unpack("<L", s[24:28])[0], struct.unpack("<L", s[28:32])[0], tz),
+        # Entry time; "<": little endian, "L": unassigned long (4 bytes)
         'atime': get_time(struct.unpack("<L", s[32:36])[0], struct.unpack("<L", s[36:40])[0], tz),
+        # File alter time; "<": little endian, "L": unassigned long (4 bytes)
         'alloc_fsize': struct.unpack("<q", s[40:48])[0],
         'real_fsize': struct.unpack("<q", s[48:56])[0],
         'flags': struct.unpack("<q", s[56:64])[0],
@@ -78,6 +88,7 @@ def get_fn_attribute(s, tz):
         'nspace': struct.unpack("B", bytes([s[65]]))[0],
     }
 
+    # Filename
     attr_bytes = s[66:66 + fn_attr['nlen'] * 2]
     try:
         fn_attr['name'] = attr_bytes.decode('utf-16').encode('utf-8')
@@ -97,7 +108,6 @@ def get_time(low, high, tz):
     unix_time = (float(high) * 2 ** 32 + low) * 1e-7 - 11644473600
 
     try:
-
         if tz:
             dt = datetime.datetime.fromtimestamp(unix_time)
         else:
@@ -114,6 +124,11 @@ def get_time(low, high, tz):
 
 # * CHECK FOR MFT RECORD ANOMALIES
 def anomaly_mftrecord_check(mft_record):
+    '''
+    Flags for MFT Record
+    0: Okay
+    1: Fixup data != Sequence Number
+    '''
     if mft_record['end_seq_1'] != mft_record['fixup_data'] or mft_record['end_seq_2'] != mft_record['fixup_data']:
         return 1
     return 0
@@ -142,8 +157,9 @@ def anomaly_timestamp_check_SI(mft_record):
             mft_record['si']['atime'][0] == 0:
         return 2
 
-    # Check for $SI with a nanosecond value of '0'
     else:
+
+        # Check for $SI with a nanosecond value of '0'
         if mft_record['si']['crtime'][2] != 0:
             if len(str(mft_record['si']['crtime'][2]).split('.')[1]) == 1 and \
                     str(mft_record['si']['crtime'][2]).split('.')[1] == str(0):
@@ -214,6 +230,7 @@ def anomaly_timestamp_check_SI_FN(mft_record, fn_count):
 
         else:
 
+            # Check for $FN with a nanosecond value of '0'
             if mft_record['fn', check]['crtime'][2] != 0:
                 if len(str(mft_record['fn', check]['crtime'][2]).split('.')[1]) == 1 and \
                         str(mft_record['fn', check]['crtime'][2]).split('.')[1] == str(0):
@@ -324,17 +341,12 @@ def get_mft_entry_header(raw_data):
 # * HEADERS FOR OUT.CSV
 def csvheader():
     listheader = ["Data Number", "Signature", "Fix-up Data Offset", "Fix-up Data Array Size", "Log Sequence Number",
-                  "Sequence Number", "Reference Count", "Attribute Offset", "Entry Flags", "MFT Record Actual Size",
-                  "MFT Record Allocated",
-                  "Base Record File Reference", "Next Attribute ID", "MFT Data Number", "$SI Creation Time",
-                  "$SI Modified Time",
-                  "$SI Change Time", "$SI Access Time", "$FN_1 Creation Time", "$FN_1 Modified Time",
-                  "$FN_1 Change Time", "$FN_1 Access Time", "$FN_1 Filename Length", "$FN_1 Name Space Length",
-                  "$FN_1 Filename",
-                  "$FN_2 Creation Time", "$FN_2 Modified Time", "$FN_2 Change Time", "$FN_2 Access Time",
-                  "$FN_2 Filename Length", "$FN_2 Name Space Length", "$FN_2 Filename",
-                  "$FN_3 Creation Time", "$FN_3 Modified Time", "$FN_3 Change Time", "$FN_3 Access Time",
-                  "$FN_3 Filename Length", "$FN_3 Name Space Length", "$FN_3 Filename"]
+    "Sequence Number", "Reference Count", "Attribute Offset", "Entry Flags", "MFT Record Actual Size", "MFT Record Allocated",
+    "Base Record File Reference", "Next Attribute ID", "MFT Data Number",
+    "$SI Creation Time", "$SI Modified Time", "$SI Change Time", "$SI Access Time", "DOS File Permission", "Owner ID",
+    "$FN_1 Creation Time", "$FN_1 Modified Time", "$FN_1 Change Time", "$FN_1 Access Time", "$FN_1 Flag", "$FN_1 Filename Length", "$FN_1 Name Space Length", "$FN_1 Filename", 
+    "$FN_2 Creation Time", "$FN_2 Modified Time", "$FN_2 Change Time", "$FN_2 Access Time", "$FN_2 Flag", "$FN_2 Filename Length", "$FN_2 Name Space Length", "$FN_2 Filename", 
+    "$FN_3 Creation Time", "$FN_3 Modified Time", "$FN_3 Change Time", "$FN_3 Access Time", "$FN_3 Flag", "$FN_3 Filename Length", "$FN_3 Name Space Length", "$FN_3 Filename"]
     return listheader
 
 
@@ -347,13 +359,13 @@ def excel_date(date1):
 def retrReason(n):
     anomreason = {
         "anomalymftrecord": "MFT record might be tampered/damaged",
-        "anomaly_SI_1": "$SI Timestamp zerorised",
+        "anomaly_SI_1": "$SI Timestamp zeroised",
         "anomaly_SI_2": "$SI Timestamp is invalid",
         "anomaly_SI_3": "$SI Timestamp with 0 nanosecond",
         "anomaly_SI_4": "$SI Create Timestamp after $SI Modify Timestamp",
         "anomaly_SI_5": "$SI Assess Timestamp after both $SI Modify Timestamp and $SI Create Timestamp",
         "anomaly_SI_6": "$SI Timestamp after Current Time",
-        "anomaly_SI_FN_1": "$FN Timestamp zerorised",
+        "anomaly_SI_FN_1": "$FN Timestamp zeroised",
         "anomaly_SI_FN_2": "$FN Timestamp is invalid",
         "anomaly_SI_FN_3": "$FN Timestamp with 0 nanosecond",
         "anomaly_SI_FN_4": "$SI Create Timestamp before $FN Create Timestamp",
@@ -387,7 +399,6 @@ def writecsv(mft_record):
                   mft_record['entry_flags'], mft_record['used_entry_size'],
                   mft_record['total_entry_size'], mft_record['base_rec_file_ref'],
                   mft_record['next_attr_id'], mft_record['record_num']]
-    # print(mft_record['si']['crtime'])
     if 'si' not in mft_record:
         csvcontent.extend(padding(6))
     elif 'si' in mft_record:
@@ -408,6 +419,7 @@ def writecsv(mft_record):
         else:
             csvcontent.extend(padding(1))
         csvcontent.extend([mft_record['si']['dos'], mft_record['si']["own_id"]])
+
     if mft_record['fncount'] == 0:
         csvcontent.extend(padding(21))
     elif mft_record['fncount'] > 0:
@@ -434,6 +446,7 @@ def writecsv(mft_record):
             csvcontent.extend(
                 [mft_record['fn', check]['flags'], mft_record['fn', check]['nlen'], mft_record['fn', check]['nspace'],
                  str(mft_record['fn', check]['name'])[2:-1]])
+
     if mft_record['fncount'] < 3:
         csvcontent.extend(padding((3 - mft_record['fncount']) * 7))
     return csvcontent
@@ -461,7 +474,7 @@ def get_mft_eh_val(file):
     file.seek(0)
     while (True):
         anomaly_bool_not_none, anomaly_bool_not_invalid = True, True
-        count += 1
+        count += 1  
         hexdata = file.read(1024)
         if hexdata[:4] == b'\x00\x00\x00\x00':
             continue
@@ -471,6 +484,7 @@ def get_mft_eh_val(file):
             result.close()
             break
         if hexdata != "":
+
             # ? Get MFT entry header
             mft_record = {}
             mft_record = get_mft_entry_header(hexdata)
@@ -483,8 +497,8 @@ def get_mft_eh_val(file):
             # ? Do Anomaly Check if MFT record is tampered
             bool_mftrecord_check = anomaly_mftrecord_check(mft_record)
             if bool_mftrecord_check == 1:
-                wd.append((count, "anomalymftrecord"))
-                wr.writerow([count, retrReason("anomalymftrecord")])
+                wd.append((mft_record['record_num'], "anomalymftrecord"))
+                wr.writerow([mft_record['record_num'], retrReason("anomalymftrecord")])
                 anomalymftrecord += 1
 
             # ? Do Anomaly Check on $SI only
@@ -492,30 +506,30 @@ def get_mft_eh_val(file):
                 flag_SI = anomaly_timestamp_check_SI(mft_record)
                 if flag_SI != 0:
                     if flag_SI == 1:
-                        wd.append((count, "anomaly_SI_1"))
-                        wr.writerow([count, retrReason("anomaly_SI_1")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_1"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_1")])
                         anomaly_SI_1 += 1
                         anomaly_bool_not_none = False
                     if flag_SI == 2:
-                        wd.append((count, "anomaly_SI_2"))
-                        wr.writerow([count, retrReason("anomaly_SI_2")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_2"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_2")])
                         anomaly_SI_2 += 1
                         anomaly_bool_not_invalid = False
                     if flag_SI == 3:
-                        wd.append((count, "anomaly_SI_3"))
-                        wr.writerow([count, retrReason("anomaly_SI_3")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_3"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_3")])
                         anomaly_SI_3 += 1
                     if flag_SI == 4:
-                        wd.append((count, "anomaly_SI_4"))
-                        wr.writerow([count, retrReason("anomaly_SI_4")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_4"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_4")])
                         anomaly_SI_4 += 1
                     if flag_SI == 5:
-                        wd.append((count, "anomaly_SI_5"))
-                        wr.writerow([count, retrReason("anomaly_SI_5")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_5"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_5")])
                         anomaly_SI_5 += 1
                     if flag_SI == 6:
-                        wd.append((count, "anomaly_SI_6"))
-                        wr.writerow([count, retrReason("anomaly_SI_6")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_6"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_6")])
                         anomaly_SI_6 += 1
 
             # ? Do Anomaly check only if both $SI and $FN is available
@@ -523,24 +537,24 @@ def get_mft_eh_val(file):
                 flag_SI_FN = anomaly_timestamp_check_SI_FN(mft_record, mft_record['fncount'])
                 if flag_SI_FN != 0:
                     if flag_SI_FN == 1:
-                        wd.append((count, "anomaly_SI_FN_1"))
-                        wr.writerow([count, retrReason("anomaly_SI_FN_1")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_FN_1"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_FN_1")])
                         anomaly_SI_FN_1 += 1
                     if flag_SI_FN == 2:
-                        wd.append((count, "anomaly_SI_FN_2"))
-                        wr.writerow([count, retrReason("anomaly_SI_FN_2")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_FN_2"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_FN_2")])
                         anomaly_SI_FN_2 += 1
                     if flag_SI_FN == 3:
-                        wd.append((count, "anomaly_SI_FN_3"))
-                        wr.writerow([count, retrReason("anomaly_SI_FN_3")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_FN_3"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_FN_3")])
                         anomaly_SI_FN_3 += 1
                     if flag_SI_FN == 4:
-                        wd.append((count, "anomaly_SI_FN_4"))
-                        wr.writerow([count, retrReason("anomaly_SI_FN_4")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_FN_4"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_FN_4")])
                         anomaly_SI_FN_4 += 1
                     if flag_SI_FN == 5:
-                        wd.append((count, "anomaly_SI_FN_5"))
-                        wr.writerow([count, retrReason("anomaly_SI_FN_5")])
+                        wd.append((mft_record['record_num'], "anomaly_SI_FN_5"))
+                        wr.writerow([mft_record['record_num'], retrReason("anomaly_SI_FN_5")])
                         anomaly_SI_FN_5 += 1
 
         else:
@@ -552,7 +566,7 @@ def get_mft_eh_val(file):
         [count, anomalymftrecord, anomaly_SI_1, anomaly_SI_2, anomaly_SI_3, anomaly_SI_4, anomaly_SI_5, anomaly_SI_6,
          anomaly_SI_FN_1, anomaly_SI_FN_2, anomaly_SI_FN_3, anomaly_SI_FN_4, anomaly_SI_FN_5])
 
-    # *************************************************Start Report********************************************************#
+# *************************************************Start Report********************************************************#
     reportName = file.name + "_digital_forensic_summary_report"
     createReport(count, file, overalldata, wd, reportName, gen_folderpath, )
 
@@ -631,13 +645,13 @@ def createReport(count, file, overalldata, wd, reportName, gen_folderpath):
     anomalyFlagged.add_run(str(totalanomalynum) + " anomalies").underline = True
     anomaly_records = (
         (1, 'MFT record might be tampered/damaged', anomaly1),
-        (2, '$SI Timestamp zerorised', anomaly2),
+        (2, '$SI Timestamp zeroised', anomaly2),
         (3, '$SI Timestamp is invalid', anomaly3),
         (4, '$SI Timestamp with 0 nanosecond', anomaly4),
         (5, '$SI Create Timestamp after $SI Modify Timestamp', anomaly5),
         (6, '$SI Assess Timestamp after both $SI Modify Timestamp and $SI Create Timestamp', anomaly6),
         (7, '$SI Timestamp after Current Time', anomaly7),
-        (8, '$FN Timestamp zerorised', anomaly8),
+        (8, '$FN Timestamp zeroised', anomaly8),
         (9, '$FN Timestamp is invalid', anomaly9),
         (10, "$FN Timestamp with 0 nanosecond", anomaly10),
         (11, '$SI Create Timestamp after $FN Create Timestamp', anomaly11),
@@ -718,7 +732,7 @@ def createReport(count, file, overalldata, wd, reportName, gen_folderpath):
     doc_report = gen_folderpath + reportName + '.docx'
     pdf_report = gen_folderpath + reportName + '.pdf'
 
-    # convert(doc_report)
+    # Convert(doc_report)
     convert(doc_report, pdf_report)
     os.remove(doc_report)
 
