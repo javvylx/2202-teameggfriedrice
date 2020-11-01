@@ -3,9 +3,9 @@ This is a Year 2 Trimester 1 ICT 2202 - Digital Forensic Project. This project's
 
 The tool identifies timestamp and Master File Table (MFT) record anomalies automatically and return the user with a consolidated digital forensic summary report of all the findings of potential areas of forensic investigation. The MFT records, including the MFT entry header, Standard Information attribute table and File Name attribute table, will be examined to extract and analyse its offset values.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=YOUTUBE_VIDEO_ID_HERE
-" target="_blank"><img src="https://img.youtube.com/vi/<VIDEO ID>/maxresdefault.jpg" 
-alt="MFT analyser video" width="240" height="180" border="10" /></a>
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=2RpdTD4ShGE
+" target="_blank"><img src="https://img.youtube.com/vi/2RpdTD4ShGE/maxresdefault.jpg" 
+alt="ICT2202 MFT Analyser - TeamEggFriedRice" width="240" height="180" border="10" /></a>
 
 ## Getting Started
 Download or clone the project into a folder of your choice. To clone using linux:
