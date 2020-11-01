@@ -28,7 +28,7 @@ To install the tools, run `pip install` in python console/terminal:
 | argparse   | A Python library to write user-friendly command-line interfaces.            |
 | time       | A Python library to provide access to time-related functions.               |
 
-## Usage
+## Prerequisite
 Below is a method to extract the raw MFT file for analysis by the tool. There may be other alternatives to extracting the raw file.
 1. Using a linux terminal, find the correct offset using [mmls](http://www.sleuthkit.org/sleuthkit/man/mmls.html):
 
@@ -41,8 +41,8 @@ Below is a method to extract the raw MFT file for analysis by the tool. There ma
 	```sh
 	icat -o <offset> <dd image> 0 > mft.raw
 	```
-
-After obtaining the raw MFT file, parse it to the tool for analysis.
+## Usage
+With the raw MFT file, parse it to the tool for analysis.
 
 1. Navigate to project folder in command prompt or pycharm terminal.
 
