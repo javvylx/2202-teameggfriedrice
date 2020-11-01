@@ -33,18 +33,27 @@ To install the tools, run `pip install` in python console/terminal:
 ## Usage
 1. Find the correct offset using [mmls](http://www.sleuthkit.org/sleuthkit/man/mmls.html):
 
-```mmls <dd image>```
+	```sh
+	mmls <dd image>
+	```
+
 2. Extract raw MFT file:
 
-```icat -o <offset> <dd image> 0 > mft.raw```
+	```sh
+	icat -o <offset> <dd image> 0 > mft.raw
+	```
+
 3. Navigate to project folder in command prompt or pycharm terminal.
+
 4. Run the MFT Analyser with the raw MFT file: 
 
-```python 2202_teameggfriedrice_mft_final.py -f <raw MFT file>``` 
+	```sh
+	python 2202_teameggfriedrice_mft_final.py -f <raw MFT file>
+	``` 
 
 ## Authors
-- Javier Lim 		| [@javvylx](https://github.com/javvylx)
-- Tay Kai Keng 		| [@TayKK](https://github.com/TayKK)
-- Jerry Tan Fu Wei 	| [@Jerry19968](https://github.com/Jerry19968)
-- Chin Bing Hong 	| [@CB-Hong](https://github.com/CB-Hong)
-- Claudia Chan 		| [@x3Kuro](https://github.com/x3Kuro)
+- Javier Lim [@javvylx](https://github.com/javvylx)
+- Tay Kai Keng [@TayKK](https://github.com/TayKK)
+- Jerry Tan Fu Wei [@Jerry19968](https://github.com/Jerry19968)
+- Chin Bing Hong [@CB-Hong](https://github.com/CB-Hong)
+- Claudia Chan [@x3Kuro](https://github.com/x3Kuro)
