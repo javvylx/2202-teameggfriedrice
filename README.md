@@ -7,8 +7,7 @@ The tool identifies timestamp and Master File Table (MFT) record anomalies autom
 alt="ICT2202 MFT Analyser - TeamEggFriedRice" width="240" height="180" border="10" /></a>
 
 ## Getting Started
-Download the project into a folder of your choice using the following link:
-https://github.com/javvylx/2202-teameggfriedrice
+Download the project into a folder of your choice using the following [link](https://github.com/javvylx/2202-teameggfriedrice)
 > **_NOTE:_** The tool is only compatible with Windows OS
 
 ## Dependencies
