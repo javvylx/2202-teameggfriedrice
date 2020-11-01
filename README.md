@@ -8,9 +8,8 @@ The tool identifies timestamp and Master File Table (MFT) record anomalies autom
 alt="ICT2202 MFT Analyser - TeamEggFriedRice" width="240" height="180" border="10" /></a>
 
 ## Getting Started
-Download or clone the project into a folder of your choice. To clone using linux:
-
-```git clone https://github.com/javvylx/2202-teameggfriedrice```
+Download the project into a folder of your choice using the following link**:
+https://github.com/javvylx/2202-teameggfriedrice
 
 ## List of Dependencies for the MFT Tool 
 
@@ -57,3 +56,5 @@ To install the tools, run `pip install` in python console/terminal:
 - Jerry Tan Fu Wei [@Jerry19968](https://github.com/Jerry19968)
 - Chin Bing Hong [@CB-Hong](https://github.com/CB-Hong)
 - Claudia Chan [@x3Kuro](https://github.com/x3Kuro)
+
+** Only applicable on Windows Machines
